@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path, include
-from accounts.views import register, login
+from accounts.views import register, login, organization_settings
 from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
@@ -13,4 +13,6 @@ urlpatterns = [
 
     # Inventory APIs
     path('api/', include('inventory.urls')),
+
+    path('api/settings/', organization_settings, name='organization-settings'),
 ]

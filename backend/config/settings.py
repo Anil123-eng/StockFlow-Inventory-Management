@@ -23,7 +23,10 @@ load_dotenv(BASE_DIR / '.env')
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-9yx3l!i+kojb&i&_31l2fxkoyfj3#-!st)^_x0!zzu^8*s-50h'
+SECRET_KEY = os.getenv('SECRET_KEY')
+
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY is not configured")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -136,15 +139,23 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 
-# Email
-# https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
+# --------------------------------------------------
+# EMAIL CONFIGURATION
+# --------------------------------------------------
 
 MAILERS = {
     'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+        'BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
+        'OPTIONS': {
+            'host': os.getenv('EMAIL_HOST', 'localhost'),
+            'port': int(os.getenv('EMAIL_PORT', '25')),
+            'username': os.getenv('EMAIL_HOST_USER', ''),
+            'password': os.getenv('EMAIL_HOST_PASSWORD', ''),
+            'use_tls': os.getenv('EMAIL_USE_TLS', 'False').lower() == 'true',
+            'timeout': 10,
+        },
     },
 }
-
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [

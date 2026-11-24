@@ -151,3 +151,37 @@ def product_detail(request, product_id):
         {'message': 'Product deleted successfully.'},
         status=status.HTTP_200_OK
     )
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def dashboard(request):
+    organization = request.user.organization
+
+    products = Product.objects.filter(organization=organization)
+
+    total_products = products.count()
+
+    total_stock = sum(
+        product.quantity for product in products
+    )
+
+    low_stock_products = products.filter(
+        quantity__lte=F('low_stock_threshold')
+    )
+
+    low_stock_data = [
+        {
+            'id': product.id,
+            'name': product.name,
+            'sku': product.sku,
+            'quantity': product.quantity,
+            'low_stock_threshold': product.low_stock_threshold,
+        }
+        for product in low_stock_products
+    ]
+
+    return Response({
+        'total_products': total_products,
+        'total_stock': total_stock,
+        'low_stock_products': low_stock_data,
+    })
